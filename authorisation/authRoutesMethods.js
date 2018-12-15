@@ -1,65 +1,53 @@
-let userDBHelper
+'use strict';
 
-module.exports = injectedUserDBHelper => {
+const accessTokenDBHelper = require('../databaseHelpers/accessTokensDBHelper');
+const userDBHelper = require('../databaseHelpers/userDBHelper');
 
-  userDBHelper = injectedUserDBHelper
-
-  return {
-    registerUser: registerUser,
-    login: login
+// sends a response created out of the specified parameters to the client.
+// The typeOfCall is the purpose of the client's api call
+function sendResponse (res, message, error) {
+  if (error) {
+    message = !message ?
+      error.stack ?
+        error.stack.split('\n').toString() :
+        error.toString() :
+      '';
   }
+  res
+    .status(error !== null ? error !== null ? 400 : 200 : 400)
+    .json({ message, error });
 }
 
-/* handles the api call to register the user and insert them into the users table.
-  The req body should contain a username and password. */
-function registerUser(req, res){
+class AuthController {
 
+  static login(registerUserQuery, res) {
+    
+  }
+
+  /* handles the api call to register the user and insert them into the users table.
+    The req body should contain a username and password. */
+  static registerUser(req, res) {
     console.log(`authRoutesMethods: registerUser: req.body is:`, req.body);
 
+    const username = req.body.username;
+    const password = req.body.password;
+
     //query db to see if the user exists already
-    userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
-
-      //check if the user exists
-      if (sqlError !== null || doesUserExist){
-
-        //message to give summary to client
-        const message = sqlError !== null ? "Operation unsuccessful" : "User already exists"
-
-        //detailed error message from callback
-        const error =  sqlError !== null ? sqlError : "User already exists"
-
-        sendResponse(res, message, sqlError)
-
-        return
-      }
-
-      //register the user in the db
-      userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
-
-        //create message for the api response
-        const message =  dataResponseObject.error === null  ? "Registration was successful" : "Failed to register user"
-
-        sendResponse(res, message, dataResponseObject.error)
+    return userDBHelper.doesUserExist(username)
+      .then(userExist => {
+        // check if the user exists
+        if (userExist) {
+          throw 'Username exists in the database'// this should have thrown an error
+        } else { // register the user in the db
+          return userDBHelper.registerUserInDB(username, password)
+        }
       })
-    })
+      .then(dataResponseObject => {
+        console.log('dataResponseObject', dataResponseObject);
+        sendResponse(res, 'Registration was successful')
+      })
+      .catch(err => sendResponse(res, '', err));
   }
-
-
-
-
-function login(registerUserQuery, res){
-
-
 }
 
-//sends a response created out of the specified parameters to the client.
-//The typeOfCall is the purpose of the client's api call
-function sendResponse(res, message, error) {
-
-        res
-        .status(error !== null ? error !== null ? 400 : 200 : 400)
-        .json({
-             'message': message,
-             'error': error,
-        })
-}
+module.exports = AuthController;
