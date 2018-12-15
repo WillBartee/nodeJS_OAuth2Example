@@ -1,5 +1,13 @@
 let mySqlConnection
 
+/*
+CREATE TABLE `access_tokens` (
+  `user_id` varchar(36) DEFAULT NULL,
+  `access_token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY ('user_id')
+)
+*/
+
 module.exports = injectedMySqlConnection => {
 
   mySqlConnection = injectedMySqlConnection
@@ -20,7 +28,11 @@ module.exports = injectedMySqlConnection => {
  */
 function saveAccessToken(accessToken, userID, callback) {
 
-  const getUserQuery =  `INSERT INTO access_tokens (access_token, user_id) VALUES ("${accessToken}", ${userID}) ON DUPLICATE KEY UPDATE access_token = "${accessToken}";`
+  const getUserQuery =  `
+    INSERT INTO access_tokens
+    (access_token, user_id)
+    VALUES ("${accessToken}", "${userID}")
+    ON DUPLICATE KEY UPDATE access_token = "${accessToken}";`
 
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {

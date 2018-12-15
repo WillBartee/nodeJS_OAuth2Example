@@ -1,5 +1,14 @@
 let mySqlConnection;
 
+/*
+CREATE TABLE `users` (
+  `id` varchar(36) NOT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  `user_password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
+*/
+
 module.exports = injectedMySqlConnection => {
 
   mySqlConnection = injectedMySqlConnection
@@ -24,7 +33,8 @@ module.exports = injectedMySqlConnection => {
 function registerUserInDB(username, password, registrationCallback){
 
   //create query using the data in the req.body to register the user in the db
-  const registerUserQuery = `INSERT INTO users (username, user_password) VALUES ('${username}', SHA('${password}'))`
+  const registerUserQuery = `INSERT INTO users (id, username, user_password)
+    VALUES (UUID(), '${username}', SHA('${password}'))`
 
   //execute the query to register the user
   mySqlConnection.query(registerUserQuery, registrationCallback)
