@@ -4,18 +4,6 @@ const config = require('config');
 const secret = require(__dirname+'/secrets');
 
 class Knexfile {
-  /*
-  * These functions are named to explicitly represent the allowed environments for knex
-  */
-  static get development() { return Knexfile.get(); }
-  static get jenkins1() { return Knexfile.get(); }
-  static get jenkins2() { return Knexfile.get(); }
-  static get prod() { return Knexfile.get(); }
-  static get sandbox() { return Knexfile.get(); }
-  static get stage() { return Knexfile.get(); }
-  static get test() { return Knexfile.get(); }
-  static get beta() { return Knexfile.get(); }
-
   /**
   * This determines the database connection values base on
   * the NODE_ENV environment variable or requested environemnt.
